@@ -1,0 +1,124 @@
+# version: '3.8'
+
+# services:
+#   node-app:
+#     image: node:14
+#     working_dir: /usr/src/app
+#     volumes:
+#       - .:/usr/src/app
+#       - /usr/src/app/node_modules
+#     ports:
+#       - '80:5173'
+#     environment:
+#       - NODE_ENV=development
+#       - DB_HOST=mysql
+#       - DB_USER=root
+#       - DB_PASSWORD=example
+#       - DB_NAME=mydatabase
+#     depends_on:
+#       - mysql
+#     command: sh -c "npm install && npm run dev"
+
+#   mysql:
+#     image: mysql:8.0
+#     ports:
+#       - '3306:3306'
+#     environment:
+#       MYSQL_ROOT_PASSWORD: example
+#       MYSQL_DATABASE: mydatabase
+#     volumes:
+#       - mysql-data:/var/lib/mysql
+
+# volumes:
+#   mysql-data:
+
+# version: '3.8'
+
+# services:
+#   node-app:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.test1
+#     volumes:
+#       - .:/app
+#       - /app/node_modules
+#     ports:
+#       - '80:5173'
+#     environment:
+#       - NODE_ENV=development
+#       - DB_HOST=mysql
+#       - DB_USER=root
+#       - DB_PASSWORD=example
+#       - DB_NAME=mydatabase
+#     depends_on:
+#       - mysql
+
+#   mysql:
+#     image: mysql:8.0
+#     ports:
+#       - '3306:3306'
+#     environment:
+#       MYSQL_ROOT_PASSWORD: example
+#       MYSQL_DATABASE: mydatabase
+#     volumes:
+#       - mysql-data:/var/lib/mysql
+
+  # check_port_front1:
+  #   image: check_port_front1:latest
+  #   ports:
+  #     - '80:5173'
+
+# volumes:
+#   mysql-data:
+
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./back
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: youruser
+      DB_PASSWORD: yourpassword
+      DB_NAME: yourdatabase
+    ports:
+      - '8000:8000'
+    networks:
+      - backend
+
+  nginx:
+    restart: always
+    build:
+      context: ./front
+    ports:
+      - '80:80'
+    depends_on:
+      - api  # Различие здесь
+    networks:
+      - backend # Различие здесь
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: yourdatabase
+      MYSQL_USER: youruser
+      MYSQL_PASSWORD: yourpassword
+    ports:
+      - "3306:3306"  # Различие здесь
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - backend  # Различие здесь
+
+volumes:
+  mysql-data:
+
+networks:
+  backend:
